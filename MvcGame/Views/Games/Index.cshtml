@@ -1,0 +1,80 @@
+﻿@model PaginatedList<MvcGame.Models.Game>
+
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>My games collection</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+    <form asp-action="Index" method="get">
+        <div class="form-actions no-color">
+            <p>
+                Find by title: <input type="text" name="SearchString" value="@ViewData["CurrentFilter"]" />
+                <input type="submit" value="Search" class="btn btn-default" />
+            </p>
+        </div>
+    </form>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["TitleSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">Title</a>
+            </th>
+            <th>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["DateSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">ReleaseDate</a>
+            </th>
+            <th>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["GenreSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">Genre</a>
+            </th>
+            <th>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["PriceSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">Price</a>
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Title)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ReleaseDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Genre)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Price)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+
+@{
+    var currentPage = Model.PageIndex + 1;
+}
+
+@if (Model.TotalPages > 1)
+{
+    @for (int pageNumber = 1; pageNumber <= Model.TotalPages; pageNumber++)
+    {
+        <a asp-action="Index"
+           asp-route-sortOrder="@ViewData["CurrentSort"]"
+           asp-route-pageNumber="@(pageNumber)"
+           asp-route-currentFilter="@ViewData["CurrentFilter"]"
+           class="btn btn-default @(currentPage == pageNumber ? "active" : "")">
+            @pageNumber
+        </a>
+    }
+}
