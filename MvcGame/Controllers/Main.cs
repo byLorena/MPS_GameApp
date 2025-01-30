@@ -23,5 +23,6 @@ namespace MvcGame.Controllers
 
             return View();
         }
+
     }
 }

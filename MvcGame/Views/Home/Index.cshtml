@@ -2,7 +2,119 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div id="carouselGames" class="carousel slide" data-bs-ride="carousel" data-bs-interval="2500" style="width: 800px; height: 400px; margin: 0 auto;">
+    <div class="carousel-inner" style="width: 100%; height: 100%;">
+        <div class="carousel-item active">
+            <img src="/images/beyondtwosouls.jpg" class="d-block w-100" style="object-fit: cover;" alt="Beyond Two Souls">
+        </div>
+        <div class="carousel-item">
+            <img src="/images/dyinglight.jpg" class="d-block w-100" style="object-fit: cover;" alt="Dying Light">
+        </div>
+        <div class="carousel-item">
+            <img src="/images/tlou1.jpg" class="d-block w-100" style="object-fit: cover;" alt="The Last of Us 1">
+        </div>
+    </div>
+
+    <!-- Butoanele Prev/Next -->
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselGames" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselGames" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+    </button>
 </div>
+
+<!-- Punctele Indicator -->
+<div class="carousel-indicators custom-indicators">
+    <button type="button" data-bs-target="#carouselGames" data-bs-slide-to="0" class="active" aria-current="true"></button>
+    <button type="button" data-bs-target="#carouselGames" data-bs-slide-to="1"></button>
+    <button type="button" data-bs-target="#carouselGames" data-bs-slide-to="2"></button>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const carousel = document.getElementById('carouselGames');
+            const indicators = document.querySelectorAll('.custom-indicators button');
+
+            carousel.addEventListener('slid.bs.carousel', function (event) {
+                indicators.forEach((indicator, index) => {
+                    indicator.classList.toggle('active', index === event.to);
+                });
+            });
+        });
+    </script>
+}
+
+<style>
+    /* Stilizare pentru puncte SUB carusel */
+    .custom-indicators {
+        position: static; /* Anulează poziționarea absolută */
+        margin-top: 10px; /* Spațiu între carusel și puncte */
+        justify-content: center; /* Centrează punctele */
+    }
+
+        .custom-indicators button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: rgba(0, 0, 0, 0.3);
+            border: none;
+            margin: 0 8px;
+            transition: all 0.2s ease;
+        }
+
+        .custom-indicators .active {
+            background-color: #fff;
+            transform: scale(1.2);
+        }
+</style>
+
+<!-- Secțiunea cu jocurile recent adăugate -->
+<div class="recent-games-section" style="margin-top: 40px;">
+    <h2>Recent added games</h2>
+    <div class="row">
+        @foreach (var game in Model)
+        {
+            <div class="col-md-3">
+                <a href="@Url.Action("Details", "Games", new { id = game.Id })" class="game-link">
+                <img src="@game.AddImage" alt="@game.Title" class="img-fluid" style="width: 100%; height: 200px; object-fit: cover;" />
+                    <div class="game-card">
+                        <h5 class="game-name">@game.Title</h5>
+                    </div>
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    /* Stilizare pentru secțiunea de jocuri */
+    .recent-games-section {
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+    }
+
+    .game-card {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .game-name {
+        margin-top: 10px;
+        font-size: 16px;
+        color: #333;
+    }
+
+    .game-link {
+        text-decoration: none;
+    }
+
+    .game-link:hover .game-card {
+        transform: scale(1.05);
+        transition: transform 0.3s ease;
+    }
+</style>

@@ -19,6 +19,12 @@ namespace MvcGame.Controllers
             _context = context;
         }
 
+        public IActionResult Collection()
+        {
+            ViewData["Title"] = "Games";
+            return View();
+        }
+
         // GET: Games
         public async Task<IActionResult> Index(
             string sortOrder,
@@ -75,7 +81,7 @@ namespace MvcGame.Controllers
                     games = games.OrderBy(s => s.Title);
                     break;
             }
-            int pageSize = 3;
+            int pageSize = 5;
             return View(await PaginatedList<Game>.CreateAsync(games.AsNoTracking(), pageNumber ?? 1, pageSize));
         }
 
@@ -110,8 +116,26 @@ namespace MvcGame.Controllers
         // POST: Games/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,ReleaseDate,Genre,Price")] Game game)
+        public async Task<IActionResult> Create(
+     [Bind("Id,Title,ReleaseDate,Genre,Price, AddImage")] Game game,
+     IFormFile imageFile) // Adaugam IFormFile ca parametru
         {
+            if (imageFile != null && imageFile.Length > 0)
+            {
+                // Generam un nume unic pentru imagine
+                var fileName = $"game_{Guid.NewGuid()}_{Path.GetFileName(imageFile.FileName)}";
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/games", fileName);
+
+                // Salvam fișierul pe server
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await imageFile.CopyToAsync(stream);
+                }
+
+                // Salvam calea relativă în baza de date
+                game.AddImage = $"/images/games/{fileName}";
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(game);
@@ -140,11 +164,37 @@ namespace MvcGame.Controllers
         // POST: Games/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,ReleaseDate,Genre,Price")] Game game)
+        public async Task<IActionResult> Edit(int id,
+    [Bind("Id,Title,ReleaseDate,Genre,Price,AddImage")] Game game,
+    IFormFile imageFile) // Adaugam IFormFile
         {
             if (id != game.Id)
             {
                 return NotFound();
+            }
+
+            if (imageFile != null && imageFile.Length > 0)
+            {
+                // Ștergem vechea imagine
+                if (!string.IsNullOrEmpty(game.AddImage))
+                {
+                    var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", game.AddImage.TrimStart('/'));
+                    if (System.IO.File.Exists(oldFilePath))
+                    {
+                        System.IO.File.Delete(oldFilePath);
+                    }
+                }
+
+                // Salvam noua imagine
+                var fileName = $"game_{Guid.NewGuid()}_{Path.GetFileName(imageFile.FileName)}";
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/games", fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await imageFile.CopyToAsync(stream);
+                }
+
+                game.AddImage = $"/images/games/{fileName}";
             }
 
             if (ModelState.IsValid)
@@ -170,14 +220,27 @@ namespace MvcGame.Controllers
             return View(game);
         }
 
+        // POST: AddReview
         [HttpPost]
-        public async Task<ActionResult> AddReview(int gameId, string username, string message)
+        public IActionResult AddReview(int gameId, string username, string message)
         {
+            var game = _context.Game.Include(g => g.Reviews).FirstOrDefault(g => g.Id == gameId);
+            if (game == null)
+            {
+                return NotFound();
+            }
 
+            var review = new Review
+            {
+                User = username,
+                ReviewMessage = message,
+                PublishDate = DateTime.Now,
+                GameId = gameId
+            };
 
-            var review = new Review() { GameId = gameId, User = username, ReviewMessage = message, PublishDate = DateTime.Now };
-            _context.Review.Add(review);
-            await _context.SaveChangesAsync();
+            game.Reviews.Add(review);
+            _context.SaveChanges();
+
             return RedirectToAction("Details", new { id = gameId });
         }
 
@@ -206,7 +269,7 @@ namespace MvcGame.Controllers
         {
             if (_context.Game == null)
             {
-                return Problem("Entity set 'MvcGameContext.Game'  is null.");
+                return Problem("Entity set 'MvcGameContext.Game' is null.");
             }
             var game = await _context.Game.FindAsync(id);
             if (game != null)
@@ -221,6 +284,26 @@ namespace MvcGame.Controllers
         private bool GameExists(int id)
         {
           return (_context.Game?.Any(e => e.Id == id)).GetValueOrDefault();
+        }
+
+        // POST: Games/DeleteReview/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteReview(int reviewId)
+        {
+            var review = await _context.Review.FindAsync(reviewId);
+            if (review == null)
+            {
+                return NotFound();
+            }
+
+            // Salvăm gameId pentru redirecționare
+            var gameId = review.GameId;
+
+            _context.Review.Remove(review);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Details", new { id = gameId });
         }
     }
 }

@@ -4,92 +4,166 @@
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
-
-<div>
-    <h4>Game</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Title)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ReleaseDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ReleaseDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Genre)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Genre)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Price)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Price)
-        </dd>
-    </dl>
-</div>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                User
-            </th>
-            <th>
-                ReviewMessage
-            </th>
-            <th>
-                PublishDate
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model.Reviews.Any()){
-            foreach (var review in Model.Reviews)
-            {
-                <tr>
-                    <td>
-                        @Html.DisplayFor(modelItem => review.User)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => review.ReviewMessage)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => review.PublishDate)
-                    </td>
-                </tr>
-        }
-        }
-    </tbody>
-</table>
-
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="AddReview">
-            <input type="hidden" name="gameId" value="@Model.Id" />
-            <div class="form-group">
-                <label class="control-label">Username</label>
-                <input name="username" class="form-control" />
-            </div>
-            <div class="form-group">
-                <label class="control-label">Message</label>
-                <input name="message" class="form-control" />
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
-</div>
-<div>
+<h1>Your Game Details</h1>
+<!-- Link-urile Edit și Back -->
+<div class="mt-4">
     <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
     <a asp-action="Index">Back to List</a>
 </div>
+
+<div class="container mt-4">
+    <!-- Rand principal pentru imagine și detalii -->
+    <div class="row">
+        <!-- Coloana pentru imagine -->
+        <div class="col-md-6">
+            <div class="image-container">
+            <img src="@Model.AddImage"
+                 alt="@Model.Title"
+                 class="img-fluid rounded"
+            </div>
+        </div>
+
+        <!-- Coloana pentru detalii -->
+        <div class="col-md-6">
+            <div class="game-details">
+                <dl class="row">
+                    <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Title)</dt>
+                    <dd class="col-sm-8">@Html.DisplayFor(model => model.Title)</dd>
+
+                    <dt class="col-sm-4">@Html.DisplayNameFor(model => model.ReleaseDate)</dt>
+                    <dd class="col-sm-8">@Html.DisplayFor(model => model.ReleaseDate)</dd>
+
+                    <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Genre)</dt>
+                    <dd class="col-sm-8">@Html.DisplayFor(model => model.Genre)</dd>
+
+                    <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Price)</dt>
+                    <dd class="col-sm-8">@Html.DisplayFor(model => model.Price)</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabelul cu review-uri -->
+    <div class="row mt-8">
+        <div class="col-12 mt-3">
+            <h3>Reviews</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>
+                            User
+                        </th>
+                        <th>
+                            Review Message
+                        </th>
+                        <th>
+                            Publish Date
+                        </th>
+                        <th>
+                            Actions
+                        </th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Reviews.Any())
+                    {
+
+                        foreach (var review in Model.Reviews)
+
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => review.User)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => review.ReviewMessage)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => review.PublishDate)
+                                </td>
+                                <td>
+                                    <form asp-action="DeleteReview" method="post">
+                                        <input type="hidden" name="reviewId" value="@review.Id" />
+                                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+
+    <!-- Butonul Add Review -->
+    <div class="row mt-3">
+        <div class="col-12">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addReviewModal">
+                Add Review
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pentru review -->
+<div class="modal fade" id="addReviewModal" tabindex="-1" aria-labelledby="addReviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addReviewModalLabel">Add a Review</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addReviewForm" asp-action="AddReview" method="post">
+                    <input type="hidden" name="gameId" value="@Model.Id" />
+                    <div class="form-group">
+                        <label class="control-label">Username</label>
+                        <input name="username" class="form-control" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">Message</label>
+                        <textarea name="message" class="form-control" rows="3" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" form="addReviewForm" class="btn btn-primary">Add Review</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Stiluri adiționale */
+    .game-details {
+        background-color: #C4CAF2;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .image-container {
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+
+    dt {
+        font-weight: 600;
+        color: #333;
+    }
+
+    dd {
+        margin-bottom: 15px;
+    }
+
+    .btn-danger.btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+</style>

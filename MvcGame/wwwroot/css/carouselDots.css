@@ -1,0 +1,12 @@
+﻿.carousel-indicators {
+    position: absolute;
+    top: 490px; /* Ajustează poziția punctelor */
+}
+
+.carousel-inner {
+    position: relative;
+}
+
+.carousel-item img {
+    object-fit: cover; /* Încadrarea imaginii */
+}

@@ -11,6 +11,7 @@ namespace MvcGame.Models
         public DateTime ReleaseDate { get; set; }
         public string? Genre { get; set; }
         public decimal Price { get; set; }
+        public string AddImage { get; set; }
         public List<Review>? Reviews { get; set; }
     }
 }
